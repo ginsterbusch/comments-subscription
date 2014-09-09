@@ -1,10 +1,9 @@
 === Comments Subscription ===
-Contributors: Tobiask, Fabian Wolf
-Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3736248
+Contributors: Fabian Wolf
 Tags: comments, subscribe, double opt in, kommentar, abonnieren, opt in, optin, kommentare, benachrichtigung, mail
 Requires at least: 3.2
 Tested up to: 3.9
-Stable tag: 6.5
+Stable tag: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,8 +11,9 @@ An effort to combine features of other forks of the well-known Subscribe-to-Comm
 
 == Changelog ==
 
-= 6.5 =
+= 2.0 =
 
+* Changed the version number to 2.0 to reflect the name change
 * Partial rewrite adding templates incl. override option via current theme
 * Added customizable comment URL (mostly to add the current comment ID as hash)
 

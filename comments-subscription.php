@@ -2,9 +2,9 @@
 /*
 Plugin Name: Comments Subscription
 Plugin URI: https://github.com/ginsterbusch/comments-subscription
-Description: Allows readers to receive notifications of new comments that are posted to an entry, with Double-Opt-In Feature, Custom comment URL and optional templates. Based on Subscribe to Double-Opt-In Comments by Tobias Koelligan (http://www.sjmp.de/internet/subscribe-to-comments-mit-double-opt-in-pruefung/).
+Description: Allows readers to receive notifications of new comments that are posted to an entry, with Double-Opt-In Feature, Custom comment URL and optional templates. Based on Subscribe to Double-Opt-In Comments by Tobias Koelligan (http://www.sjmp.de/internet/subscribe-to-comments-mit-double-opt-in-pruefung/). Note: Untested alpha version! USE AT OWN RISK!
 Author: Fabian Wolf
-Version: 6.5
+Version: 2.0a
 Author URI: http://usability-idealist.de/
 */
 
