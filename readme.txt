@@ -1,16 +1,21 @@
-=== Subscribe to Double-Opt-In Comments ===
-Contributors: Tobiask
+=== Comments Subscription ===
+Contributors: Tobiask, Fabian Wolf
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3736248
-Tags: comments, subscribe, double opt in, kommentar, abonnieren, opt in, optin, kommentare, benachrichtigung
+Tags: comments, subscribe, double opt in, kommentar, abonnieren, opt in, optin, kommentare, benachrichtigung, mail
 Requires at least: 3.2
 Tested up to: 3.9
-Stable tag: 6.4.1
+Stable tag: 6.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Based on the well known Subscribe-to-Comments PlugIn, but now with double-opt-in feature to prevent spam.
+An effort to combine features of other forks of the well-known Subscribe-to-Comments PlugIn with the Subscribe-to-Double-Opt-In-Comments plugin, which features double-opt-in to prevent spam and stay in line with European laws.
 
 == Changelog ==
+
+= 6.5 =
+
+* Partial rewrite adding templates incl. override option via current theme
+* Added customizable comment URL (mostly to add the current comment ID as hash)
 
 = 6.4.1 =
 * fixed warning: illegal string offset

@@ -1,133 +1,90 @@
 <?php
-  /*
-   Plugin Name: Subscribe To "Double-Opt-In" Comments
-   Plugin URI: http://www.sjmp.de/internet/subscribe-to-comments-mit-double-opt-in-pruefung/
-   Description: Allows readers to receive notifications of new comments that are posted to an entry, with Double-Opt-In Feature.  Based on version 2 of "Subscribe to Comments" from Mark Jaquith (http://txfx.net/).
-   Author: Tobias Koelligan
-   Version: 6.4.1
-   Author URI: http://www.sjmp.de/
-   */
-  
-  register_deactivation_hook(__FILE__, 'stc_deinstall');
-  register_uninstall_hook(__FILE__, 'stc_deinstall');
-  
-  function init_i10n() {
-	$plugin_dir = "subscribe-to-double-opt-in-comments";
-	$locale = get_locale();
-	if (!empty($locale)) {
-		$domain_str = 'subscribe-to-doi-comments';
-		$mo_file = dirname(__FILE__) . '/languages/' . $domain_str . '-' . $locale . '.mo';
-		load_plugin_textdomain($domain_str, false, dirname(plugin_basename(__FILE__)) . '/languages');
+/*
+Plugin Name: Subscribe To "Double-Opt-In" Comments
+Plugin URI: http://www.sjmp.de/internet/subscribe-to-comments-mit-double-opt-in-pruefung/
+Description: Allows readers to receive notifications of new comments that are posted to an entry, with Double-Opt-In Feature.  Based on version 2 of "Subscribe to Comments" from Mark Jaquith (http://txfx.net/). Inspired by Subscribe to Comments Reloaded (http://wordpress.org/extend/plugins/subscribe-to-comments-reloaded/).
+Author: Tobias Koelligan, Fabian Wolf
+Version: 6.5
+Author URI: http://www.sjmp.de/
+*/
+
+	register_deactivation_hook(__FILE__, 'stc_deinstall');
+	register_uninstall_hook(__FILE__, 'stc_deinstall');
+
+	function init_i10n() {
+		$plugin_dir = "subscribe-to-double-opt-in-comments";
+		$locale = get_locale();
+		if (!empty($locale)) {
+			$domain_str = 'subscribe-to-doi-comments';
+			$mo_file = dirname(__FILE__) . '/languages/' . $domain_str . '-' . $locale . '.mo';
+			load_plugin_textdomain($domain_str, false, dirname(plugin_basename(__FILE__)) . '/languages');
+		}
 	}
-  }
-  
-  if (!is_multisite()) {
-	init_i10n();
-  }
+
+	if (!is_multisite()) {
+		init_i10n();
+	}
   
   /**
    * Delete options in database on deactivation of plugin
    */
-  function stc_deinstall() {
-      delete_option('sg_subscribe_settings');
-  }
-  
-  /* This is the code that is inserted into the comment form */
-  function show_subscription_checkbox($id = '0') {
-      global $sg_subscribe;
-      sg_subscribe_start();
-      
-      if ($sg_subscribe->checkbox_shown)
-          return $id;
-      if (!$email = $sg_subscribe->current_viewer_subscription_status())
-          : $checked_status = (!empty($_COOKIE['subscribe_checkbox_' . COOKIEHASH]) && 'checked' == $_COOKIE['subscribe_checkbox_' . COOKIEHASH]) ? true : false;
-?>
+	function stc_deinstall() {
+	  delete_option('sg_subscribe_settings');
+	}
+  	  
+	/* This is the code that is inserted into the comment form */
+	function show_subscription_checkbox($id = '0') {
+		global $sg_subscribe;
+		sg_subscribe_start();
 
-<?php
-      /* ------------------------------------------------------------------- */
-?>
-<?php
-      /* This is the text that is displayed for users who are NOT subscribed */
-?>
-<?php
-      /* ------------------------------------------------------------------- */
-?>
+		$return = $id;
 
-  <p <?php
-      if (isset($sg_subscribe->clear_both) && $sg_subscribe->clear_both == "true")
-          echo 'style="clear:both;" ';
-?>class="subscribe-to-doi-comments">
-  <input type="checkbox" name="subscribe" id="subscribe" value="subscribe" style="width: auto;" <?php
-      if ($checked_status)
-          echo 'checked="checked" ';
-?>/>
-  <label for="subscribe"><?php
-      _e($sg_subscribe->not_subscribed_text);
-?></label>
-  </p>
-
-<?php
-      /* ------------------------------------------------------------------- */
-?>
-
-<?php
-      elseif ($email == 'admin' && current_user_can('manage_options'))
-          :
-?>
-
-<?php
-          /* ------------------------------------------------------------- */
-?>
-<?php
-          /* This is the text that is displayed for the author of the post */
-?>
-<?php
-          /* ------------------------------------------------------------- */
-?>
-
-  <p <?php
-          if (isset($sg_subscribe->clear_both) && $sg_subscribe->clear_both == "true")
-              echo 'style="clear:both;" ';
-?>class="subscribe-to-doi-comments">
-  <?php
-      _e(str_replace('[manager_link]', $sg_subscribe->manage_link($email, true, false), $sg_subscribe->author_text));
-?>
-  </p>
-
-<?php
-      else
-          :
-?>
-
-<?php
-          /* --------------------------------------------------------------- */
-?>
-<?php
-          /* This is the text that is displayed for users who ARE subscribed */
-?>
-<?php
-          /* --------------------------------------------------------------- */
-?>
-
-  <p <?php
-          if (isset($sg_subscribe->clear_both) && $sg_subscribe->clear_both == "true")
-              echo 'style="clear:both;" ';
-?>class="subscribe-to-doi-comments">
-  <?php
-      _e(str_replace('[manager_link]', $sg_subscribe->manage_link($email, true, false), $sg_subscribe->subscribed_text));
-?>
-  </p>
-
-<?php
-      /* --------------------------------------------------------------- */
-?>
-
-<?php
-      endif;
-      
-      $sg_subscribe->checkbox_shown = true;
-      return $id;
-  }
+		if ( ! $sg_subscribe->checkbox_shown) {
+		
+	
+			// prepare variables
+			$arrPClass = array('subscribe-to-doi-comments');
+			$is_unsubscribed_user = false;
+			
+			if( isset($sg_subscribe->clear_both) && $sg_subscribe->clear_both == 'true') {
+				 $arrPClass[] = apply_filters( 'stc_doi_clearfix_class', 'clearfix' );
+			}
+		
+		
+			// unsubscribed users
+			if (!$email = $sg_subscribe->current_viewer_subscription_status()) {
+				$checked_status = (!empty($_COOKIE['subscribe_checkbox_' . COOKIEHASH]) && 'checked' == $_COOKIE['subscribe_checkbox_' . COOKIEHASH]) ? true : false;
+				$strSubscriptionText = $sg_subscribe->not_subscribed_text;
+				$is_unsubscribed_user = true;
+		
+			
+			
+			// This is the text that is displayed for the author of the post
+			} elseif ($email == 'admin' && current_user_can('manage_options')) {
+				$strSubscriptionText = str_replace('[manager_link]', $sg_subscribe->manage_link($email, true, false), $sg_subscribe->author_text);
+			
+			// subscribed user
+				
+			} else {
+				$strSubscriptionText = str_replace('[manager_link]', $sg_subscribe->manage_link($email, true, false), $sg_subscribe->subscribed_text);
+			}
+			
+			// load template
+			$strLoadTemplate = dirname(plugin_basename(__FILE__)) . '/templates/subscription-checkbox.php'; // default
+			
+			// override
+			if( file_exists( get_stylesheet_directory() . '/doi-templates/subscription-checkbox.php' ) ) {
+				$strLoadTemplate = get_stylesheet_directory() . '/doi-templates/subscription-checkbox.php';
+			}
+			
+			include( $strLoadTemplate );
+			
+			
+			$sg_subscribe->checkbox_shown = true;
+		}
+		
+		return $return;
+	}
   
   
   
@@ -136,206 +93,114 @@
   /* Place this somewhere within "the loop", but NOT within another form  */
   /* This is NOT inserted automaticallly... you must place it yourself    */
   /* -------------------------------------------------------------------- */
-  function show_manual_subscription_form() {
-      global $id, $sg_subscribe, $user_email;
-      sg_subscribe_start();
-      $sg_subscribe->show_errors('solo_subscribe', '<div class="solo-subscribe-errors">', '</div>', __('<strong>Error: </strong>', 'subscribe-to-doi-comments'), '<br />');
-      
-      if (!$sg_subscribe->current_viewer_subscription_status())
-          : get_currentuserinfo();
-?>
+	function show_manual_subscription_form() {
+		global $id, $sg_subscribe, $user_email;
+		sg_subscribe_start();
+		$sg_subscribe->show_errors('solo_subscribe', '<div class="solo-subscribe-errors">', '</div>', __('<strong>Error: </strong>', 'subscribe-to-doi-comments'), '<br />');
 
-<?php
-      /* ------------------------------------------------------------------- */
-?>
-<?php
-      /* This is the text that is displayed for users who are NOT subscribed */
-?>
-<?php
-      /* ------------------------------------------------------------------- */
-?>
-
-  <form action="" method="post">
-  <input type="hidden" name="solo-comment-subscribe" value="solo-comment-subscribe" />
-  <input type="hidden" name="postid" value="<?php
-      echo(int)$id;
-?>" />
-  <input type="hidden" name="ref" value="<?php
-      echo urlencode('http://' . $_SERVER['HTTP_HOST'] . esc_attr($_SERVER['REQUEST_URI']));
-?>" />
-
-  <p class="solo-subscribe-to-doi-comments">
-  <?php
-      echo $sg_subscribe->withoutCom_text;
-?>
-  <br />
-  <label for="solo-subscribe-email"><?php
-      _e('E-Mail:', 'subscribe-to-doi-comments');
-?>
-  <input type="text" name="email" id="solo-subscribe-email" size="22" value="<?php
-      echo $user_email;
-?>" /></label>
-  <input type="submit" name="submit" value="<?php
-      _e('Subscribe', 'subscribe-to-doi-comments');
-?>" />
-  </p>
-  </form>
-
-<?php
-      /* ------------------------------------------------------------------- */
-?>
-
-<?php
-      endif;
-  }
+		if (!$sg_subscribe->current_viewer_subscription_status()) {
+			get_currentuserinfo();
+			
+			// load template
+			$strLoadTemplate = dirname(plugin_basename(__FILE__)) . '/templates/subscription-form-template-tag.php'; // default
+			
+			// override
+			if( file_exists( get_stylesheet_directory() . '/doi-templates/subscription-checkbox.php' ) ) {
+				$strLoadTemplate = get_stylesheet_directory() . '/doi-templates/subscription-form-template-tag.php';
+			}
+			
+			include( $strLoadTemplate );
+		}
+	}
   
   
   
-  /* -------------------------
-   Use this function on your comments display - to show whether a user is subscribed to comments on the post or not.
-   Note: this must be used within the comments loop!  It will not work properly outside of it.
-   ------------------------- */
-  function comment_subscription_status() {
-      global $comment;
-      if ($comment->comment_subscribe_optin == 'Y') {
-          return true;
-      } else {
-          return false;
-      }
-  }
+	/* -------------------------
+	Use this function on your comments display - to show whether a user is subscribed to comments on the post or not.
+	Note: this must be used within the comments loop!  It will not work properly outside of it.
+	------------------------- */
+	function comment_subscription_status() {
+		global $comment;
+
+		return ($comment->comment_subscribe_optin == 'Y') ? true : false;
+
+	}
   
   
   /* ============================= */
   /* DO NOT MODIFY BELOW THIS LINE */
   /* ============================= */
   
-  class sg_subscribe_settings {
-      function options_page_contents() {
-          global $sg_subscribe;
-          sg_subscribe_start();
-          if (isset($_POST['sg_subscribe_settings_submit'])) {
-              check_admin_referer('subscribe-to-doi-comments-update_options');
-              $update_settings = stripslashes_deep($_POST['sg_subscribe_settings']);
-              $sg_subscribe->update_settings($update_settings);
-          }
-  
-		  $donationlink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3736248';
+	class sg_subscribe_settings {
+		function options_page_contents() {
+		  global $sg_subscribe;
+		  sg_subscribe_start();
 		  
+		  if (isset($_POST['sg_subscribe_settings_submit'])) {
+			  
+			  check_admin_referer('subscribe-to-doi-comments-update_options');
+			  $update_settings = stripslashes_deep($_POST['sg_subscribe_settings']);
+			  $sg_subscribe->update_settings($update_settings);
+		  }
+
+			//$donationlink = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3736248';
+
 			$strSettingsFieldName = 'sg_subscribe_settings[%s]'; // template. nifty, eh?
-			$strKnownKeywords = 
-          
-          echo '<h2>' . __('Subscribe to Comments Options', 'subscribe-to-doi-comments') . '</h2> (by Tobias K. from <a href="http://www.sjmp.de/" target="_blank">sjmp.de</a>, please <a href="'.$donationlink.'" target="_blank">donate</a> if you like the plugin!)';
-          echo '<ul>';
-          
-          echo '<li><label for="name">' . __('"From" name for notifications:', 'subscribe-to-doi-comments') . ' <input type="text" size="40" id="name" name="sg_subscribe_settings[name]" value="' . sg_subscribe_settings::form_setting('name') . '" /></label></li>';
-          echo '<li><label for="email">' . __('"From" e-mail addresss for notifications:', 'subscribe-to-doi-comments') . ' <input type="text" size="40" id="email" name="sg_subscribe_settings[email]" value="' . sg_subscribe_settings::form_setting('email') . '" /></label></li>';
-          echo '<li><label for="clear_both"><input type="checkbox" id="clear_both" name="sg_subscribe_settings[clear_both]" value="true"' . sg_subscribe_settings::checkflag('clear_both') . ' /> ' . __('Do a CSS "clear" on the subscription checkbox/message (uncheck this if the checkbox/message appears in a strange location in your theme)', 'subscribe-to-doi-comments') . '</label></li>';
-          
-          
-          /**
-           * Enable custom comment urls
-           * 
-           * @author Fabian Wolf (@link http://usability-idealist.de/)
-           */
+			//$strKnownKeywords = 
 
-
-			echo '<li><label for="custom-comment-url">'.__('Custom comment URL', 'subscribe-to-doi-comments').'</label> <input type="text" name="'. sprintf( $strSettingsFieldName, 'custom_comment_url' ).'" id="custom-comment-url" value="'.sg_subscribe_settings::form_setting('custom_comment_url').'" /><span class="description">'. sprintf( __('Acts as template for the comment URL. If left empty, defaults to <strong>[post_permalink]/#comments</strong>. Known keywords: %s', 'subscribe-to-doi-comments'), $strKnownKeywords ).'</span></li>';
+			// load template
+			$strLoadTemplate = dirname(plugin_basename(__FILE__)) . '/templates/admin-options.php'; // default
 			
+			// override
+			if( file_exists( get_stylesheet_directory() . '/doi-templates/admin-options.php' ) ) {
+				$strLoadTemplate = get_stylesheet_directory() . '/doi-templates/admin-options.php';
+			}
 			
+			include( $strLoadTemplate );
 
-			echo '</ul>';
 
-          
-          
-          echo '<fieldset><legend>' . __('Comment Form Text', 'subscribe-to-doi-comments') . '</legend>';
-          
-          echo '<p>' . __('Customize the messages shown to different people.  Use <code>[manager_link]</code> to insert the URI to the Subscription Manager.', 'subscribe-to-doi-comments') . '</p>';
-          
-          echo '<ul>';
-          
-          echo '<li><label for="not_subscribed_text">' . __('Not subscribed', 'subscribe-to-doi-comments') . '</label><br /><textarea style="width: 98%; font-size: 12px;" rows="2" cols="60" id="not_subscribed_text" name="sg_subscribe_settings[not_subscribed_text]">' . (sg_subscribe_settings::textarea_setting('not_subscribed_text')) . '</textarea></li>';
-          
-          echo '<li><label for="subscribed_text">' . __('Subscribed', 'subscribe-to-doi-comments') . '</label><br /><textarea style="width: 98%; font-size: 12px;" rows="2" cols="60" id="subscribed_text" name="sg_subscribe_settings[subscribed_text]">' . (sg_subscribe_settings::textarea_setting('subscribed_text')) . '</textarea></li>';
-          
-          echo '<li><label for="author_text">' . __('Entry Author', 'subscribe-to-doi-comments') . '</label><br /><textarea style="width: 98%; font-size: 12px;" rows="2" cols="60" id="author_text" name="sg_subscribe_settings[author_text]">' . (sg_subscribe_settings::textarea_setting('author_text')) . '</textarea></li>';
-          
-          echo '<li><label for="withoutCom_text">' . __('"Subscribe without Commenting" Text', 'subscribe-to-doi-comments') . '</label><br /><textarea style="width: 98%; font-size: 12px;" rows="2" cols="60" id="withoutCom_text" name="sg_subscribe_settings[withoutCom_text]">' . (sg_subscribe_settings::textarea_setting('withoutCom_text')) . '</textarea></li>';
-          
-          echo '<li><label for="confirmation_text">' . __('Confirmation Text (will be shown after user has clicked on the confirmation link)', 'subscribe-to-doi-comments') . '</label><br /><textarea style="width: 98%; font-size: 12px;" rows="2" cols="60" id="confirmation_text" name="sg_subscribe_settings[confirmation_text]">' . (sg_subscribe_settings::textarea_setting('confirmation_text')) . '</textarea></li>';
-          
-          echo '<li><label for="mail_text_head">' . __('Headline for Double-Opt-In', 'subscribe-to-doi-comments') . ' <input type="text" size="40" id="mail_text_head" name="sg_subscribe_settings[mail_text_head]" value="' . (sg_subscribe_settings::form_setting('mail_text_head')) . '" /></label></li>';
-          
-          echo '<li><label for="mail_text">' . __('Mail Text for Double-Opt-In ([verify_url] will be replaced with URL to subscribe finally, no HTML!)', 'subscribe-to-doi-comments') . '</label><br /><textarea style="width: 98%; font-size: 12px;" rows="8" cols="60" id="mail_text" name="sg_subscribe_settings[mail_text]">' . (sg_subscribe_settings::textarea_setting('mail_text')) . '</textarea></li>';
-          
-          echo '</ul></fieldset>';
-          
-          echo '<fieldset>';
-          echo '<legend><input type="checkbox" id="use_custom_style" name="sg_subscribe_settings[use_custom_style]" value="true"' . sg_subscribe_settings::checkflag('use_custom_style') . ' /> <label for="use_custom_style">' . __('Use custom style for Subscription Manager', 'subscribe-to-doi-comments') . '</label></legend>';
-          
-          echo '<p>' . __('These settings only matter if you are using a custom style.  <code>[theme_path]</code> will be replaced with the path to your current theme.', 'subscribe-to-doi-comments') . '</p>';
-          
-          echo '<ul>';
-          echo '<li><label for="sg_sub_header">' . __('Path to header:', 'subscribe-to-doi-comments') . ' <input type="text" size="40" id="sg_sub_header" name="sg_subscribe_settings[header]" value="' . sg_subscribe_settings::form_setting('header') . '" /></label></li>';
-          echo '<li><label for="sg_sub_sidebar">' . __('Path to sidebar:', 'subscribe-to-doi-comments') . ' <input type="text" size="40" id="sg_sub_sidebar" name="sg_subscribe_settings[sidebar]" value="' . sg_subscribe_settings::form_setting('sidebar') . '" /></label></li>';
-          echo '<li><label for="sg_sub_footer">' . __('Path to footer:', 'subscribe-to-doi-comments') . ' <input type="text" size="40" id="sg_sub_footer" name="sg_subscribe_settings[footer]" value="' . sg_subscribe_settings::form_setting('footer') . '" /></label></li>';
-          
-          
-          echo '<li><label for="before_manager">' . __('HTML for before the subscription manager:', 'subscribe-to-doi-comments') . ' </label><br /><textarea style="width: 98%; font-size: 12px;" rows="2" cols="60" id="before_manager" name="sg_subscribe_settings[before_manager]">' . sg_subscribe_settings::textarea_setting('before_manager') . '</textarea></li>';
-          echo '<li><label for="after_manager">' . __('HTML for after the subscription manager:', 'subscribe-to-doi-comments') . ' </label><br /><textarea style="width: 98%; font-size: 12px;" rows="2" cols="60" id="after_manager" name="sg_subscribe_settings[after_manager]">' . sg_subscribe_settings::textarea_setting('after_manager') . '</textarea></li>';
-          echo '</ul>';
-          echo '</fieldset>';
-		  
-		  echo '<fieldset>';
-          echo '<legend>' . __('Hide copyright notice (please consider a donation via PayPal!)', 'subscribe-to-doi-comments') . '</legend>';
-          
-          echo '<p>' . __('You can hide the copyright notice published on the subscription manager page. This is optional. Please consider a donation via PayPal if you hide the copyright notice!', 'subscribe-to-doi-comments') . '</p>';
-		  echo '<p style="color:darkred;">' . __('Lots of work was and is put into this plugin, so be fair and donate if you hide the copyright notice!', 'subscribe-to-doi-comments');
-		  printf(__(' <a href="%s" target="_blank">Donate here!</a></p>', 'subscribe-to-doi-comments'), $donationlink);
+		}
+      
+	function checkflag($optname) {
+		$options = get_settings('sg_subscribe_settings');
+		
+		if (isset($options[$optname]) && $options[$optname] == "true") {
+			
+			return ' checked="checked"';
+		}
+		return '';
+		}
+	  
+	  function form_setting($optname) {
+		  $options = get_settings('sg_subscribe_settings');
+		  return esc_attr($options[$optname]);
+	  }
+	  
+	  function textarea_setting($optname) {
+		  $options = get_settings('sg_subscribe_settings');
+		  return wp_specialchars($options[$optname]);
+	  }
+	  
+	  function options_page() {
+			/** Display "saved" notification on post **/
+			if (isset($_POST['sg_subscribe_settings_submit']))
+			  echo '<div class="updated"><p><strong>' . __('Options saved.', 'subscribe-to-doi-comments') . '</strong></p></div>';
 
-		  echo '<ul>';
-          echo '<li><label for="hideCopyright"><input type="checkbox" id="hideCopyright" name="sg_subscribe_settings[hideCopyright]" value="true"' . sg_subscribe_settings::checkflag('hideCopyright') . ' /> ' . __('Hide the copyright notice from the subscription manager.', 'subscribe-to-doi-comments') . '</label></li>';
-          echo '</ul>';
-          
-          echo '</fieldset>';
-      }
-      
-      function checkflag($optname) {
-          $options = get_settings('sg_subscribe_settings');
-          if (isset($options[$optname]) && $options[$optname] == "true") {
-              return ' checked="checked"';
-          }
-          return '';
-      }
-      
-      function form_setting($optname) {
-          $options = get_settings('sg_subscribe_settings');
-          return esc_attr($options[$optname]);
-      }
-      
-      function textarea_setting($optname) {
-          $options = get_settings('sg_subscribe_settings');
-          return wp_specialchars($options[$optname]);
-      }
-      
-      function options_page() {
-          /** Display "saved" notification on post **/
-          if (isset($_POST['sg_subscribe_settings_submit']))
-              echo '<div class="updated"><p><strong>' . __('Options saved.', 'subscribe-to-doi-comments') . '</strong></p></div>';
-          
-          echo '<form method="post"><div class="wrap">';
-          
-          sg_subscribe_settings::options_page_contents();
-          
-          echo '<p class="submit"><input type="submit" name="sg_subscribe_settings_submit" value="';
-          _e('Update Options &raquo;', 'subscribe-to-doi-comments');
-          echo '" /></p></div>';
-          
-          if (function_exists('wp_nonce_field'))
-              wp_nonce_field('subscribe-to-doi-comments-update_options');
-          
-          echo '</form>';
-      }
-  }
+			echo '<form method="post"><div class="wrap">';
+
+			sg_subscribe_settings::options_page_contents();
+
+			echo '<p class="submit"><input type="submit" name="sg_subscribe_settings_submit" value="';
+			_e('Update Options &raquo;', 'subscribe-to-doi-comments');
+			echo '" /></p></div>';
+
+			if (function_exists('wp_nonce_field')) {
+				wp_nonce_field('subscribe-to-doi-comments-update_options');
+			}
+
+			echo '</form>';
+		}
+	}
   
   class sg_subscribe {
       var $errors;
@@ -672,43 +537,55 @@
       }
       
       
-      function hidden_form_fields() {
-?>
-    <input type="hidden" name="ref" value="<?php
-          echo $this->ref;
-?>" />
-    <input type="hidden" name="key" value="<?php
-          echo $this->key;
-?>" />
-    <input type="hidden" name="email" value="<?php
-          echo $this->email;
-?>" />
-  <?php
-      }
+		function hidden_form_fields() { ?>
+
+		<input type="hidden" name="ref" value="<?php echo $this->ref; ?>" />
+		<input type="hidden" name="key" value="<?php echo $this->key; ?>" />
+		<input type="hidden" name="email" value="<?php echo $this->email; ?>" />
+
+<?php
+		}
       
       
-      function generate_key($data = '') {
-          if ('' == $data)
-              return false;
-          if (!$this->settings['salt'])
-              die('fatal error: corrupted salt');
-          return md5(md5($this->settings['salt'] . $data));
-      }
+		function generate_key($data = '') {
+			$return = false;
+
+			/*
+			if ('' == $data)
+			  return false;*/
+			  
+			if ( empty($this->settings['salt']) ) {
+				die('fatal error: corrupted salt');
+			}
+			
+			if( !empty( $data ) ) {
+				$return = md5(md5($this->settings['salt'] . $data));
+			}
+			
+			return $return;
+		}
       
       
-      function validate_key() {
-          if ($this->key == $this->generate_key($this->email))
-              $this->key_type = 'normal';
-          elseif ($this->key == $this->generate_key($this->email . $this->new_email))
-              $this->key_type = 'change_email';
-          elseif ($this->key == $this->generate_key($this->email . 'blockrequest'))
-              $this->key_type = 'block';
-          elseif (current_user_can('manage_options'))
-              $this->key_type = 'admin';
-          else
-              return false;
-          return true;
-      }
+		function validate_key() {
+			$return = false;
+
+			if ($this->key == $this->generate_key($this->email)) {
+				
+				$this->key_type = 'normal';
+				$return = true;
+			} elseif ($this->key == $this->generate_key($this->email . $this->new_email)) {
+				$this->key_type = 'change_email';
+				$return = true;
+			} elseif ($this->key == $this->generate_key($this->email . 'blockrequest')) {
+				$this->key_type = 'block';
+				$return = true;
+			} elseif (current_user_can('manage_options')) {
+				$this->key_type = 'admin';
+				$return = true;
+			} 
+
+			return $return;
+		}
       
       
       function determine_action() {
@@ -776,26 +653,80 @@
      */
     
     function get_custom_comment_url( $url_template = null, $data = array(), $keyword_template = '[%s]' ) {
+		$return = false;
+		$arrKnownKeywords = array(
+			'comment_id',
+			'post_id',
+			'post_permalink',
+			'home_url',
+			'site_url',
+		);
 		
+		if( !empty( $data ) && isset( $data['comment'] ) ) {
+			extract( $data );
+		
+			if( empty( $url_template ) ) {
+				$return = get_permalink($comment->comment_post_ID) . '#comments';
+			} else { // custom url is set
+				// build replacer array
+				
+				foreach( $arrKnownKeywords as $strKeyword ) {
+					$arrSearch[] = sprintf( $keyword_template, $strKeyword );
+					
+					switch( $strKeyword ) {
+						case 'commment_id':
+							$arrReplace[] = $comment->comment_ID;
+							break;
+						case 'post_id':
+							$arrReplace[] = $comment->comment_post_ID;
+							break;
+						case 'post_permalink':
+							$arrReplace[] = get_permalink($comment->comment_post_ID);
+							break;
+						case 'home_url':
+						case 'home':
+							$arrReplace[] = get_bloginfo('home');
+							break;
+						case 'site_url':
+						case 'siteurl':
+							$arrReplace[] = get_bloginfo('site_url');
+							break;
+					}
+					
+				}
+				
+				// execute filters
+				$arrTriggers = apply_filters( 's2doi_custom_url_keywords', $arrSearch );
+				$arrReplacements = apply_filters( 's2doi_custom_url_keyword_replacements', $arrReplace );
+				
+				// execute replacement
+				$return = str_replace( $arrTriggers, $arrReplacements, $return );
+			}
+		}
+		
+		return $return;
 	}
 	
 	function send_notifications($cid) {
 		global $wpdb;
 		
-		$cid = (int)$cid;
+		$cid = intval( $cid );
 		$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments WHERE comment_ID='$cid' LIMIT 1");
 		$post = $wpdb->get_row("SELECT * FROM $wpdb->posts WHERE ID='$comment->comment_post_ID' LIMIT 1");
-
-
+		$comment_url = '';
+		
 		if ($comment->comment_approved == '1' && $comment->comment_type == '') {
 
 
 			// Comment has been approved and isn't a trackback or a pingback, so we should send out notifications
 
 			// prepare comment url
+			
 			if( !empty($this->settings['custom_comment_url'] ) ) {
 				$comment_url = $this->get_custom_comment_url( $this->settings['custom_comment_url'], array( 'post' => $post, 'comment' => $comment ) );
-			} else {
+			}
+			
+			if( empty( $comment_url ) ) { // either returned false or custom comment url is not set
 				$comment_url = get_permalink($comment->comment_post_ID) . '#comments';
 			}
 
