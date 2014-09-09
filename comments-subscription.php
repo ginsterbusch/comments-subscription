@@ -1,11 +1,11 @@
 <?php
 /*
-Plugin Name: Subscribe To "Double-Opt-In" Comments
-Plugin URI: http://www.sjmp.de/internet/subscribe-to-comments-mit-double-opt-in-pruefung/
-Description: Allows readers to receive notifications of new comments that are posted to an entry, with Double-Opt-In Feature.  Based on version 2 of "Subscribe to Comments" from Mark Jaquith (http://txfx.net/). Inspired by Subscribe to Comments Reloaded (http://wordpress.org/extend/plugins/subscribe-to-comments-reloaded/).
-Author: Tobias Koelligan, Fabian Wolf
+Plugin Name: Comments Subscription
+Plugin URI: https://github.com/ginsterbusch/comments-subscription
+Description: Allows readers to receive notifications of new comments that are posted to an entry, with Double-Opt-In Feature, Custom comment URL and optional templates. Based on Subscribe to Double-Opt-In Comments by Tobias Koelligan (http://www.sjmp.de/internet/subscribe-to-comments-mit-double-opt-in-pruefung/).
+Author: Fabian Wolf
 Version: 6.5
-Author URI: http://www.sjmp.de/
+Author URI: http://usability-idealist.de/
 */
 
 	register_deactivation_hook(__FILE__, 'stc_deinstall');
